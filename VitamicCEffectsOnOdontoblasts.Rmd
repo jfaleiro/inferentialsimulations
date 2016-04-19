@@ -1,0 +1,91 @@
+---
+title: "Response Effect of Vitamin C on Odontoblast Length"
+author: "J Faleiro"
+date: "April 18, 2015"
+output: pdf_document
+---
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+set.seed(1234567)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(dplyr, tidyr, ggplot2, car, graphics)
+```
+
+## Overview
+
+This study analyzes the length of odontoblasts (teeth) in each of 10 guinea pigs in response to three dose levels of Vitamin C (0.5, 1, and 2 mg) with each of two delivery methods (orange juice or ascorbic acid).
+
+## Basic Exploratory Analysis
+
+```{r echo=FALSE}
+data("ToothGrowth")
+```
+
+The source data frame conta 60 observations on 3 variables:
+
+```{r}
+head(ToothGrowth)
+```
+
+Where: 
+
+* [,1]	len	numeric	Tooth length
+* [,2]	supp	factor	Supplement type (VC or OJ).
+* [,3]	dose	numeric	Dose in milligrams.
+
+The response is the length of odontoblasts (teeth) in each of 10 guinea pigs at each of three dose levels of Vitamin C (0.5, 1, and 2 mg) with each of two delivery methods (orange juice or ascorbic acid).
+
+\newpage
+The conditioning plot associated to the 2 sets of supplements, and by dose, gives some insight in the data:
+
+```{r coplot, cache=TRUE}
+coplot(len ~ dose | supp, data = ToothGrowth, panel = panel.smooth,
+        xlab = "length vs dose, given type of supplement")
+```
+
+We can see an increase of length given the type of supplement (ascorbic acid and orange juice), as well as we increase the dosage (from 0.5mg to 1.0mg to 2.0mg). 
+
+The plot does not show the quantification of this benefit as a hypothesys and a confidence to base on for the adoption of each treatment.
+\newpage
+
+## Hypothesis Testing
+
+We will consider the hypothesis $H_0$ to indicate that the treatment brings no effect, i.e. the use of ascorbic acid or orange juice is irrelevant and $\mu_0$ of the differences is zero. The alternative hypothesys $H_1$ will tell us that the mean of the differences is not close to zero, and the treatment is effective with a 95% chance.
+
+$H_0: \mu_0 = 0$
+
+$H_1: \mu_1 <> 0$
+
+We will test or $\mu_0$ for the difference for each of the doses computed as `diff05`, `diff10` and `diff20` for respectivelly 0.5, 1 and 2 mg dosages:
+
+
+```{r}
+diff05 <- filter(ToothGrowth, as.character(supp)=='OJ' & dose==0.5)$len -
+    filter(ToothGrowth, as.character(supp)=='VC' & dose==0.5)$len
+diff10 <- filter(ToothGrowth, as.character(supp)=='OJ' & dose==1.0)$len - 
+    filter(ToothGrowth, as.character(supp)=='VC' & dose==1.0)$len
+diff20 <- filter(ToothGrowth, as.character(supp)=='OJ' & dose==2.0)$len - 
+    filter(ToothGrowth, as.character(supp)=='VC' & dose==2.0)$len
+```
+
+And we test our hypothesis for each of the differences:
+
+```{r}
+rbind(
+    t.test(diff05, paired=FALSE)$conf,
+    t.test(diff10, paired=FALSE)$conf,
+    t.test(diff20, paired=FALSE)$conf
+)
+```
+
+## Conclusion
+
+You can see that the confidence interval does not contain the hypothesized population $\mu_0 = 0$ in $H_0$ for 0.5mg and 1.0mg, so we can safely reject $H_0$ in those cases, and accept $H_1$: 
+
+* *Use of ascorbic acid instead of orange juice is expected to bring benefits for 0.5mg and 1.0mg dosages*
+
+For one dose, 2.0mg, we cannot reject $H_0$:
+
+* *Use of ascorbic acid instead of orange juice is irrelevant for 2.0mg dosages*
+
+
