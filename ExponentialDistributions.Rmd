@@ -1,7 +1,7 @@
 ---
 title: "Comparative Analysis of Exponential Distributions and Properties of the Central Limit Theorem"
 author: "J Faleiro"
-date: "April 17, 2016"
+date: "April 17, 2015"
 output: pdf_document
 ---
 
